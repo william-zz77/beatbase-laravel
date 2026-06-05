@@ -10,12 +10,14 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('pengaturan_jam', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('pengaturan_jam', function (Blueprint $table) {
+        $table->id();
+        $table->time('jam_buka')->default('09:00:00');
+        $table->time('jam_tutup')->default('22:00:00');
+        $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+    });
+}
 
     /**
      * Reverse the migrations.
