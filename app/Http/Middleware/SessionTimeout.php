@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class SessionTimeout extends Controller
+class SessionTimeout
 {
     public function handle(Request $request, Closure $next): mixed
     {
