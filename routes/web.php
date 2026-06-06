@@ -19,7 +19,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin', 'session.timeout'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
     Route::resource('studio', StudioController::class);
     Route::resource('reservasi', ReservasiController::class);
@@ -28,13 +28,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Owner routes
-Route::middleware(['auth', 'role:owner'])->prefix('owner')->name('owner.')->group(function () {
+Route::middleware(['auth', 'role:owner', 'session.timeout'])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', function () { return view('owner.dashboard'); })->name('dashboard');
     Route::resource('reservasi', ReservasiController::class)->only(['index', 'show']);
 });
 
 // Customer routes
-Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+Route::middleware(['auth', 'role:customer', 'session.timeout'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', function () { return view('customer.dashboard'); })->name('dashboard');
     Route::resource('reservasi', ReservasiController::class)->only(['index', 'create', 'store']);
 });
