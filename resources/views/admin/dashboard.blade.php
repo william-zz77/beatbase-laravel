@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Admin Dashboard')
 
-@section('content')
-<div class="min-h-screen bg-gray-100">
+@section('body')
+<body class="bg-gray-100 min-h-screen">
     <nav class="bg-blue-700 text-white px-6 py-4 flex justify-between items-center">
         <h1 class="text-xl font-bold">🎵 BeatBase - Admin</h1>
         <div class="flex items-center gap-4">
@@ -30,5 +30,5 @@
             </a>
         </div>
     </div>
-</div>
+</body>
 @endsection
