@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -22,50 +21,35 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'password');
-        $remember    = $request->boolean('remember_me');
+        $remember = $request->boolean('remember_me');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt($request->only('email','password'), $remember)) {
             $request->session()->regenerate();
+            session(['login_time' => time(), 'user_role' => Auth::user()->role]);
 
-            session([
-                'user_nama'  => Auth::user()->nama,
-                'user_role'  => Auth::user()->role,
-                'login_time' => time(),
-            ]);
-
-            $role = Auth::user()->role;
-
-            $redirectTo = match($role) {
+            $response = redirect(match(Auth::user()->role) {
                 'admin'    => route('admin.dashboard'),
                 'owner'    => route('owner.dashboard'),
-                'customer' => route('customer.dashboard'),
-                default    => route('login'),
-            };
-
-            $response = redirect($redirectTo);
+                default    => route('customer.dashboard'),
+            });
 
             if ($remember) {
-                $token = base64_encode(Auth::user()->email . '|' . hash('sha256', Auth::user()->password));
-                $response = $response->withCookie(cookie('remember_token', $token, 60 * 24 * 30));
-                $response = $response->withCookie(cookie('remember_email', Auth::user()->email, 60 * 24 * 30));
+                $token = base64_encode(Auth::user()->email.'|'.hash('sha256', Auth::user()->password));
+                $response = $response
+                    ->withCookie(cookie('remember_token', $token, 60*24*30))
+                    ->withCookie(cookie('remember_email', Auth::user()->email, 60*24*30));
             } else {
-                $response = $response->withCookie(cookie()->forget('remember_token'));
-                $response = $response->withCookie(cookie()->forget('remember_email'));
+                $response = $response
+                    ->withCookie(cookie()->forget('remember_token'))
+                    ->withCookie(cookie()->forget('remember_email'));
             }
-
             return $response;
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->withInput();
+        return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
     }
 
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
+    public function showRegister() { return view('auth.register'); }
 
     public function register(Request $request)
     {
@@ -75,27 +59,21 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed',
             'role'     => 'required|in:customer,owner',
         ]);
-
         User::create([
             'nama'     => $request->nama,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
         ]);
-
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
+        return redirect()->route('login')->with('success','Registrasi berhasil! Silakan login.');
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        $response = redirect()->route('login');
-        $response = $response->withCookie(cookie()->forget('remember_token'));
-        $response = $response->withCookie(cookie()->forget('remember_email'));
-
-        return $response;
+        return redirect()->route('login')
+            ->withCookie(cookie()->forget('remember_token'))
+            ->withCookie(cookie()->forget('remember_email'));
     }
 }
