@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Login')
 
-@section('content')
+@section('body')
 <body class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 min-h-screen flex items-center justify-center">
 <div class="w-full max-w-md px-4">
 
@@ -36,7 +36,6 @@
         <form method="POST" action="/login" class="space-y-5">
             @csrf
 
-            {{-- Email --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" name="email"
@@ -46,7 +45,6 @@
                     required>
             </div>
 
-            {{-- Password --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <div class="relative">
@@ -66,7 +64,6 @@
                 </div>
             </div>
 
-            {{-- Remember Me --}}
             <div class="flex items-center">
                 <input type="checkbox" name="remember_me" id="remember_me"
                     class="w-4 h-4 text-purple-600 border-gray-300 rounded"
@@ -85,7 +82,6 @@
             <a href="/register" class="text-purple-600 font-semibold hover:underline">Daftar sekarang</a>
         </p>
 
-        {{-- Akun Demo --}}
         <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <p class="text-xs font-semibold text-gray-500 mb-2">🔑 Akun Demo:</p>
             <div class="space-y-1 text-xs text-gray-600">
@@ -103,4 +99,5 @@
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
+</body>
 @endsection
