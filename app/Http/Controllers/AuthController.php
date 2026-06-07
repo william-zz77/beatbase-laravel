@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
@@ -29,7 +28,6 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Simpan info session tambahan
             session([
                 'user_nama'  => Auth::user()->nama,
                 'user_role'  => Auth::user()->role,
@@ -38,22 +36,25 @@ class AuthController extends Controller
 
             $role = Auth::user()->role;
 
-            // Handle cookie remember me
+            $redirectTo = match($role) {
+                'admin'    => route('admin.dashboard'),
+                'owner'    => route('owner.dashboard'),
+                'customer' => route('customer.dashboard'),
+                default    => route('login'),
+            };
+
+            $response = redirect($redirectTo);
+
             if ($remember) {
                 $token = base64_encode(Auth::user()->email . '|' . hash('sha256', Auth::user()->password));
-                Cookie::queue('remember_token', $token, 60 * 24 * 30); // 30 hari
-                Cookie::queue('remember_email', Auth::user()->email, 60 * 24 * 30);
+                $response = $response->withCookie(cookie('remember_token', $token, 60 * 24 * 30));
+                $response = $response->withCookie(cookie('remember_email', Auth::user()->email, 60 * 24 * 30));
             } else {
-                Cookie::queue(Cookie::forget('remember_token'));
-                Cookie::queue(Cookie::forget('remember_email'));
+                $response = $response->withCookie(cookie()->forget('remember_token'));
+                $response = $response->withCookie(cookie()->forget('remember_email'));
             }
 
-            return match($role) {
-                'admin'    => redirect()->route('admin.dashboard'),
-                'owner'    => redirect()->route('owner.dashboard'),
-                'customer' => redirect()->route('customer.dashboard'),
-                default    => redirect()->route('login'),
-            };
+            return $response;
         }
 
         return back()->withErrors([
@@ -91,10 +92,10 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Hapus cookies remember me
-        Cookie::queue(Cookie::forget('remember_token'));
-        Cookie::queue(Cookie::forget('remember_email'));
+        $response = redirect()->route('login');
+        $response = $response->withCookie(cookie()->forget('remember_token'));
+        $response = $response->withCookie(cookie()->forget('remember_email'));
 
-        return redirect()->route('login');
+        return $response;
     }
 }
